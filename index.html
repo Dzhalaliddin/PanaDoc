@@ -214,7 +214,7 @@
     </div>
     <div>
       <label>БИН / ИИН * <span class="hint-icon" title="Ровно 12 цифр">?</span></label>
-      <input type="text" id="companyBin" placeholder="123456789012" maxlength="12" oninput="validateBinField()" onblur="checkDuplicate()">
+      <input type="text" id="companyBin" placeholder="123456789012" maxlength="12" oninput="validateBinField()" onblur="onBinBlur()">
       <div class="error-msg" id="binError">БИН должен содержать ровно 12 цифр</div>
     </div>
   </div>
@@ -286,11 +286,12 @@
 </div>
 
 <script>
-// ============ ВЕРСИЯ ДОКУМЕНТА ============
+// ============ КОНФИГ ============
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj_qMalCehP2WyxLAm_KIz3Md9TLU6Szaf5IoVAZfKAHZO_Gq3CZFW4R5MYOgWGIl5FA/exec';
 const VERSION = '1.2';
 document.getElementById('versionInfo').textContent = 'v' + VERSION;
 
-// ============ ДАННЫЕ ============
+// ============ ДАННЫЕ ЛОКАЦИЙ ============
 const DIRECTOR_PANA = 'Есенкулов Г.К.';
 const DIRECTOR_SEMEY = 'Абраев П.О.';
 const BASIS = 'Устава';
@@ -432,8 +433,6 @@ const LOCATIONS = {
   }
 };
 
-const APPS_SCRIPT_URL = 'ВАШ_URL_APPS_SCRIPT';
-
 // ============ ВСПОМОГАТЕЛЬНЫЕ ============
 function getValue(id) {
   const el = document.getElementById(id);
@@ -518,42 +517,39 @@ function validatePhoneField() {
   return ok;
 }
 
-// ============ ПРОВЕРКА ДУБЛИКАТОВ ============
-async function checkDuplicate() {
+// ============ БИН: проверка + автозаполнение ============
+async function onBinBlur() {
   const bin = getValue('companyBin');
   if (!bin || bin.length !== 12) return;
 
-  try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=checkBin&bin=' + encodeURIComponent(bin));
-    const data = await res.json();
-    if (data.found) {
-      const status = document.getElementById('status');
-      status.className = 'status info';
-      status.textContent = 'ℹ Заказчик с таким БИН уже есть в реестре: ' + data.companyName;
-    }
-  } catch (e) {
-    // тихо игнорируем — нет связи
-  }
-}
+  const status = document.getElementById('status');
+  status.className = 'status info';
+  status.textContent = 'Проверка БИН в реестре...';
 
-// ============ АВТОЗАПОЛНЕНИЕ ПО БИН ============
-async function autofillByBin(bin) {
-  if (!bin || bin.length !== 12) return;
   try {
     const res = await fetch(APPS_SCRIPT_URL + '?action=getByBin&bin=' + encodeURIComponent(bin));
     const data = await res.json();
+
     if (data.found) {
-      if (data.companyName) document.getElementById('companyName').value = data.companyName;
-      if (data.directorName) document.getElementById('directorName').value = data.directorName;
-      if (data.companyAddress) document.getElementById('companyAddress').value = data.companyAddress;
-      if (data.companyBank) document.getElementById('companyBank').value = data.companyBank;
-      if (data.companyBik) document.getElementById('companyBik').value = data.companyBik;
-      if (data.companyAccount) document.getElementById('companyAccount').value = data.companyAccount;
-      if (data.email) document.getElementById('email').value = data.email;
-      if (data.phone) document.getElementById('phone').value = data.phone;
+      if (data.companyName && !getValue('companyName')) document.getElementById('companyName').value = data.companyName;
+      if (data.directorName && !getValue('directorName')) document.getElementById('directorName').value = data.directorName;
+      if (data.companyAddress && !getValue('companyAddress')) document.getElementById('companyAddress').value = data.companyAddress;
+      if (data.companyBank && !getValue('companyBank')) document.getElementById('companyBank').value = data.companyBank;
+      if (data.companyBik && !getValue('companyBik')) document.getElementById('companyBik').value = data.companyBik;
+      if (data.companyAccount && !getValue('companyAccount')) document.getElementById('companyAccount').value = data.companyAccount;
+      if (data.email && !getValue('email')) document.getElementById('email').value = data.email;
+      if (data.phone && !getValue('phone')) document.getElementById('phone').value = data.phone;
       saveDraft();
+      status.className = 'status ok';
+      status.textContent = '✓ Данные заказчика подтянуты из реестра.';
+    } else {
+      status.className = 'status';
+      status.textContent = '';
     }
-  } catch (e) {}
+  } catch (e) {
+    status.className = 'status';
+    status.textContent = '';
+  }
 }
 
 // ============ СЛЕДУЮЩИЙ НОМЕР ============
@@ -652,6 +648,7 @@ async function generateAndDownload() {
   btn.innerHTML = '<span class="spinner"></span>Формирование...';
   const data = getFormData();
 
+  // Отправка в Google Таблицу
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -659,11 +656,11 @@ async function generateAndDownload() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-  } catch (e) { console.warn('Не удалось записать в таблицу:', e); }
+  } catch (e) { console.warn('Ошибка отправки:', e); }
 
   downloadWord(data);
   status.className = 'status ok';
-  status.textContent = '✓ Договор сформирован. Данные отправлены в реестр.';
+  status.textContent = '✓ Договор сформирован и отправлен в реестр.';
   btn.disabled = false;
   btn.innerHTML = '📄 Сформировать и скачать договор';
 }
@@ -1161,31 +1158,18 @@ ${roomsTable(L)}
 
 // ============ ИНИЦИАЛИЗАЦИЯ ============
 window.addEventListener('DOMContentLoaded', function() {
-  // Автодата сегодня
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('contractDate').value = today;
 
-  // Загрузка черновика
   loadDraft();
 
-  // Тёмная тема
   if (localStorage.getItem('darkTheme') === '1') {
     document.body.classList.add('dark-theme');
   }
 
-  // Сохранение черновика при вводе
   DRAFT_FIELDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', saveDraft);
-  });
-
-  // Автозаполнение по БИН
-  document.getElementById('companyBin').addEventListener('blur', function() {
-    const bin = this.value.trim();
-    if (bin.length === 12) {
-      checkDuplicate();
-      autofillByBin(bin);
-    }
   });
 });
 </script>
