@@ -12,7 +12,6 @@
     margin: 0;
     padding: 40px 20px;
     color: #222;
-    transition: background 0.2s, color 0.2s;
   }
   .container {
     max-width: 780px;
@@ -21,7 +20,6 @@
     padding: 30px 40px;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transition: background 0.2s;
   }
   h1 { font-size: 22px; margin-bottom: 6px; color: #1a3d6d; }
   .subtitle { font-size: 13px; color: #666; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
@@ -50,13 +48,8 @@
     border-radius: 6px;
     font-size: 14px;
     font-family: inherit;
-    transition: border-color 0.2s;
   }
   input:focus, select:focus { border-color: #2a6fdb; outline: none; }
-  input.error { border-color: #d32f2f; background: #fff5f5; }
-  input.valid { border-color: #43a047; }
-  .error-msg { font-size: 11px; color: #d32f2f; margin-top: 2px; display: none; }
-  .error-msg.visible { display: block; }
   .btn {
     width: 100%;
     padding: 14px;
@@ -68,7 +61,6 @@
     font-weight: 600;
     cursor: pointer;
     margin-top: 15px;
-    transition: background 0.2s;
   }
   .btn:hover { background: #1a4fa8; }
   .btn:disabled { background: #8aa9dd; cursor: wait; }
@@ -110,16 +102,6 @@
     margin-right: 6px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .theme-toggle {
-    background: none;
-    border: 1px solid #ccd2dc;
-    border-radius: 20px;
-    padding: 4px 10px;
-    cursor: pointer;
-    font-size: 12px;
-    color: #666;
-  }
-  .theme-toggle:hover { background: #f0f2f7; }
   .next-number-btn {
     background: #eef3fc;
     color: #2a6fdb;
@@ -140,28 +122,6 @@
     .btn { font-size: 14px; padding: 12px; }
     .btn-row { flex-direction: column; }
   }
-
-  @media (prefers-color-scheme: dark) {
-    body { background: #1a1d22; color: #e4e7eb; }
-    .container { background: #24282e; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-    h1 { color: #7aa9e6; }
-    .subtitle { color: #9aa3af; }
-    label { color: #c4c9d1; }
-    input, select { background: #1a1d22; color: #e4e7eb; border-color: #3a3f47; }
-    input.error { background: #3a1f1f; }
-    .btn-secondary { background: #24282e; }
-    .btn-secondary:hover { background: #2e333a; }
-    .btn-clear { background: #24282e; }
-    .btn-clear:hover { background: #3a1f1f; }
-    .status.ok { background: #1e3a2a; color: #7ed99b; }
-    .status.err { background: #3a1f1f; color: #ff8a80; }
-    .status.info { background: #1e2d4a; color: #7aa9e6; }
-    .loc-info { background: #1e2d4a; color: #7aa9e6; }
-    .theme-toggle { color: #c4c9d1; border-color: #3a3f47; }
-    .theme-toggle:hover { background: #2e333a; }
-    .next-number-btn { background: #1e2d4a; }
-    .next-number-btn:hover { background: #2a3d5a; }
-  }
 </style>
 </head>
 <body>
@@ -170,25 +130,23 @@
   <h1>Генератор договоров</h1>
   <div class="subtitle">
     <span>PANA HOTELS — гостиничные услуги</span>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <span class="version" id="versionInfo"></span>
-      <button class="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌓 Тема</button>
-    </div>
+    <span class="version" id="versionInfo"></span>
   </div>
 
   <div class="row">
     <div>
-      <label>Локация * <span class="hint-icon" title="Выберите отель, для которого формируется договор">?</span></label>
+      <label>Локация *</label>
       <select id="location" onchange="onLocationChange()">
         <option value="">— выберите локацию —</option>
-        <option value="semey">Pana Complex Semey (прямой)</option>
-        <option value="charyn">Pana Unique Charyn (B2B)</option>
-        <option value="kolsay">KOLSAY NOMAD (B2B)</option>
-        <option value="ayusai">Pana Ayusai (B2B)</option>
+        <option value="semey">Pana Complex Semey</option>
+        <option value="charyn">Pana Unique Charyn</option>
+        <option value="kolsay">KOLSAY NOMAD</option>
+        <option value="ayusai">Pana Ayusai</option>
+        <option value="kainar">Kainar</option>
       </select>
     </div>
     <div>
-      <label>Скидка, % <span class="hint-icon" title="Подставляется автоматически по локации">?</span></label>
+      <label>Скидка, %</label>
       <input type="text" id="discount" readonly>
     </div>
   </div>
@@ -197,71 +155,68 @@
 
   <div class="row">
     <div>
-      <label>Номер договора * <span class="hint-icon" title="Свободный ввод, например: 12/2026">?</span></label>
-      <input type="text" id="contractNumber" placeholder="Например: 12/2026">
-      <button class="next-number-btn" onclick="fetchNextNumber()" title="Получить следующий номер из Google Таблицы">→ Получить следующий номер</button>
+      <label>Номер договора *</label>
+      <input type="text" id="contractNumber" placeholder="Например: KS-01.2026">
+      <button class="next-number-btn" onclick="fetchNextNumber()">→ Получить следующий номер</button>
     </div>
     <div>
-      <label>Дата договора * <span class="hint-icon" title="По умолчанию — сегодня">?</span></label>
+      <label>Дата договора *</label>
       <input type="date" id="contractDate">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>Название организации * <span class="hint-icon" title="Полное название, например: ТОО «Ромашка»">?</span></label>
+      <label>Название организации *</label>
       <input type="text" id="companyName" placeholder="ТОО «Ромашка»">
     </div>
     <div>
-      <label>БИН / ИИН * <span class="hint-icon" title="Ровно 12 цифр">?</span></label>
-      <input type="text" id="companyBin" placeholder="123456789012" maxlength="12" oninput="validateBinField()" onblur="onBinBlur()">
-      <div class="error-msg" id="binError">БИН должен содержать ровно 12 цифр</div>
+      <label>БИН / ИИН *</label>
+      <input type="text" id="companyBin" placeholder="123456789012">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>ФИО директора * <span class="hint-icon" title="Иванов И.И. или полностью">?</span></label>
+      <label>ФИО директора *</label>
       <input type="text" id="directorName" placeholder="Иванов И.И.">
     </div>
     <div>
-      <label>Основание <span class="hint-icon" title="Устава / доверенности / иное">?</span></label>
+      <label>Основание</label>
       <input type="text" id="directorBasis" value="Устава">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>Юридический адрес <span class="hint-icon" title="Адрес заказчика по документам">?</span></label>
+      <label>Юридический адрес</label>
       <input type="text" id="companyAddress" placeholder="г. Алматы, ул. ...">
     </div>
     <div>
-      <label>Банк <span class="hint-icon" title="Название банка заказчика">?</span></label>
+      <label>Банк</label>
       <input type="text" id="companyBank" placeholder="АО «Kaspi Bank»">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>БИК <span class="hint-icon" title="8 символов, буквы и цифры">?</span></label>
-      <input type="text" id="companyBik" placeholder="CASPKZKA" maxlength="8">
+      <label>БИК</label>
+      <input type="text" id="companyBik" placeholder="CASPKZKA">
     </div>
     <div>
-      <label>Номер счёта <span class="hint-icon" title="IBAN, начинается с KZ">?</span></label>
+      <label>Номер счёта</label>
       <input type="text" id="companyAccount" placeholder="KZ...">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>Email <span class="hint-icon" title="Корпоративный email">?</span></label>
-      <input type="email" id="email" placeholder="info@company.kz" oninput="validateEmailField()">
-      <div class="error-msg" id="emailError">Некорректный email</div>
+      <label>Email</label>
+      <input type="email" id="email" placeholder="info@company.kz">
     </div>
     <div>
-      <label>Телефон <span class="hint-icon" title="Например: +7 701 123 45 67">?</span></label>
-      <input type="text" id="phone" placeholder="+7 ___ ___ __ __" oninput="validatePhoneField()">
-      <div class="error-msg" id="phoneError">Введите телефон в формате +7 XXX XXX XX XX</div>
+      <label>Телефон</label>
+      <input type="text" id="phone" placeholder="+7 ___ ___ __ __">
     </div>
   </div>
 
@@ -274,7 +229,7 @@
       👁 Предпросмотр
     </button>
     <button class="btn btn-secondary" id="templateBtn" onclick="downloadTemplate()">
-      📋 Пустой шаблон
+      📋 Скачать пустой шаблон
     </button>
   </div>
 
@@ -288,10 +243,10 @@
 <script>
 // ============ КОНФИГ ============
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj_qMalCehP2WyxLAm_KIz3Md9TLU6Szaf5IoVAZfKAHZO_Gq3CZFW4R5MYOgWGIl5FA/exec';
-const VERSION = '1.2';
+const VERSION = '1.4';
 document.getElementById('versionInfo').textContent = 'v' + VERSION;
 
-// ============ ДАННЫЕ ЛОКАЦИЙ ============
+// ============ ДАННЫЕ ============
 const DIRECTOR_PANA = 'Есенкулов Г.К.';
 const DIRECTOR_SEMEY = 'Абраев П.О.';
 const BASIS = 'Устава';
@@ -300,6 +255,7 @@ const PANA_ADDRESS = 'Туркестанская область, село Бер
 const LOCATIONS = {
   semey: {
     name: 'Pana Complex Semey',
+    prefix: 'PUS',
     type: 'Прямой',
     hotelName: 'Pana Complex Semey',
     hotelAddress: 'ВКО, г. Семей, ул. Рымбека Ильяшева, дом 45А',
@@ -315,7 +271,7 @@ const LOCATIONS = {
     bookingPhone: '+7 777 333 5656',
     discount: 15,
     minNights: 100,
-    cancelDays: 7,
+    cancelDays: 15,
     breakfast: 'включён во всех категориях',
     spa: 'включена',
     paymentTerms: '100% предоплата не позднее чем за 2 (два) банковских дня до даты заезда',
@@ -335,6 +291,7 @@ const LOCATIONS = {
   },
   charyn: {
     name: 'Pana Unique Charyn',
+    prefix: 'PUC',
     type: 'B2B',
     hotelName: 'Pana Unique Charyn',
     hotelAddress: 'Палуана улица, 1в/2, Енбекшиказахский район, Алматинская область',
@@ -350,7 +307,7 @@ const LOCATIONS = {
     bookingPhone: '+7 701 861 5121',
     discount: 7,
     minNights: 30,
-    cancelDays: 7,
+    cancelDays: 15,
     breakfast: 'по категориям',
     spa: 'нет',
     paymentTerms: '100% предоплата не позднее чем за 7 (семь) календарных дней до даты заезда',
@@ -364,6 +321,7 @@ const LOCATIONS = {
   },
   kolsay: {
     name: 'KOLSAY NOMAD',
+    prefix: 'PUK',
     type: 'B2B',
     hotelName: 'KOLSAY NOMAD',
     hotelAddress: 'Улица Ултаракова, 5а, с. Саты, Кегенский район, Алматинская область',
@@ -379,7 +337,7 @@ const LOCATIONS = {
     bookingPhone: '+7 701 861 5121',
     discount: 7,
     minNights: 50,
-    cancelDays: 7,
+    cancelDays: 15,
     breakfast: 'включён во всех категориях',
     spa: 'нет',
     paymentTerms: 'оплата не позднее 10 числа месяца, следующего за отчётным',
@@ -402,6 +360,7 @@ const LOCATIONS = {
   },
   ayusai: {
     name: 'Pana Ayusai',
+    prefix: 'PA',
     type: 'B2B',
     hotelName: 'Pana Ayusai',
     hotelAddress: 'Казахстан, г. Алматы, Бостандыкский район, ущелье Аюсай, улица Кокшокы, 1в/1',
@@ -417,7 +376,7 @@ const LOCATIONS = {
     bookingPhone: '+7 701 861 5121',
     discount: 15,
     minNights: 30,
-    cancelDays: 7,
+    cancelDays: 15,
     breakfast: 'по категориям',
     spa: 'нет',
     paymentTerms: 'оплата не позднее 10 числа месяца, следующего за отчётным',
@@ -430,6 +389,41 @@ const LOCATIONS = {
       { name: 'LODGE (костровая зона с мангалом, терраса)', area: '36 м²', bed: '2 двухспальные', count: 5, breakfast: 'входит' }
     ],
     isB2B: true
+  },
+  kainar: {
+    name: 'Kainar',
+    prefix: 'KS',
+    type: 'Прямой',
+    hotelName: 'Kainar',
+    hotelAddress: 'г. Шымкент, пр. Байдибек би, 126',
+    execFullName: 'ТОО «PANA HOTELS»',
+    execAddress: PANA_ADDRESS,
+    execBin: '260640034434',
+    execBank: 'АО «Kaspi Bank»',
+    execKbe: '17',
+    execBik: 'CASPKZKA',
+    execAccount: 'KZ72722S000054428059',
+    execDirector: DIRECTOR_PANA,
+    bookingEmail: 'sales.kainarhotel@gmail.com',
+    bookingPhone: '+7 777 333 10 10',
+    discount: 15,
+    minNights: 30,
+    cancelDays: 15,
+    breakfast: 'включён во всех категориях',
+    spa: 'включена во всех категориях',
+    paymentTerms: '100% предоплата не позднее чем за 2 (два) банковских дня до даты заезда',
+    extraPerson: '10 000',
+    extraChild: '10 000',
+    rooms: [
+      { name: 'Standard Single (Стандарт)', area: '25 м²', bed: 'Односпальная', count: 16, breakfast: 'включён' },
+      { name: 'Standard Twin (Стандарт Двухместный)', area: '35 м²', bed: '2 раздельные', count: 12, breakfast: 'включён' },
+      { name: 'Superior Double (Улучшенный стандарт)', area: '28 м²', bed: 'Двухспальная', count: 16, breakfast: 'включён' },
+      { name: 'Standard Premium (Стандарт Премиум)', area: '25 м²', bed: 'Двухспальная', count: 1, breakfast: 'включён' },
+      { name: 'Junior Suite (Делюкс)', area: '39 м²', bed: 'Двухспальная', count: 15, breakfast: 'включён' },
+      { name: 'Suite (Люкс)', area: '62 м²', bed: 'Двухспальная', count: 4, breakfast: 'включён' },
+      { name: 'Deluxe Premium (Делюкс Премиум)', area: '39 м²', bed: 'Двухспальная', count: 1, breakfast: 'включён' }
+    ],
+    isB2B: false
   }
 };
 
@@ -458,11 +452,12 @@ function onLocationChange() {
   const L = LOCATIONS[loc];
   document.getElementById('discount').value = L.discount + '%';
   info.className = 'loc-info visible';
-  info.innerHTML = `<b>${L.name}</b> — тип: <b>${L.type}</b><br>
+  info.innerHTML = `<b>${L.name}</b><br>
     Адрес объекта: ${L.hotelAddress}<br>
     Скидка: <b>${L.discount}%</b> · Минимум: <b>${L.minNights} номеро-ночей за 12 мес.</b><br>
-    Отмена: <b>${L.cancelDays} суток</b> · Оплата: ${L.paymentTerms}<br>
-    Завтрак: ${L.breakfast} · SPA: ${L.spa}`;
+    Отмена: <b>${L.cancelDays} суток</b> · Префикс: <b>${L.prefix}</b>`;
+
+  fetchNextNumber();
 }
 
 function getFormData() {
@@ -483,82 +478,17 @@ function getFormData() {
   };
 }
 
-// ============ ВАЛИДАЦИЯ ============
-function validateBinField() {
-  const bin = getValue('companyBin');
-  const field = document.getElementById('companyBin');
-  const err = document.getElementById('binError');
-  if (!bin) { field.classList.remove('error', 'valid'); err.classList.remove('visible'); return true; }
-  const ok = /^\d{12}$/.test(bin);
-  if (ok) { field.classList.remove('error'); field.classList.add('valid'); err.classList.remove('visible'); }
-  else { field.classList.add('error'); field.classList.remove('valid'); err.classList.add('visible'); }
-  return ok;
-}
-
-function validateEmailField() {
-  const email = getValue('email');
-  const field = document.getElementById('email');
-  const err = document.getElementById('emailError');
-  if (!email) { field.classList.remove('error', 'valid'); err.classList.remove('visible'); return true; }
-  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  if (ok) { field.classList.remove('error'); field.classList.add('valid'); err.classList.remove('visible'); }
-  else { field.classList.add('error'); field.classList.remove('valid'); err.classList.add('visible'); }
-  return ok;
-}
-
-function validatePhoneField() {
-  const phone = getValue('phone');
-  const field = document.getElementById('phone');
-  const err = document.getElementById('phoneError');
-  if (!phone) { field.classList.remove('error', 'valid'); err.classList.remove('visible'); return true; }
-  const ok = /^\+?[\d\s\-()]{10,20}$/.test(phone);
-  if (ok) { field.classList.remove('error'); field.classList.add('valid'); err.classList.remove('visible'); }
-  else { field.classList.add('error'); field.classList.remove('valid'); err.classList.add('visible'); }
-  return ok;
-}
-
-// ============ БИН: проверка + автозаполнение ============
-async function onBinBlur() {
-  const bin = getValue('companyBin');
-  if (!bin || bin.length !== 12) return;
-
-  const status = document.getElementById('status');
-  status.className = 'status info';
-  status.textContent = 'Проверка БИН в реестре...';
-
-  try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=getByBin&bin=' + encodeURIComponent(bin));
-    const data = await res.json();
-
-    if (data.found) {
-      if (data.companyName && !getValue('companyName')) document.getElementById('companyName').value = data.companyName;
-      if (data.directorName && !getValue('directorName')) document.getElementById('directorName').value = data.directorName;
-      if (data.companyAddress && !getValue('companyAddress')) document.getElementById('companyAddress').value = data.companyAddress;
-      if (data.companyBank && !getValue('companyBank')) document.getElementById('companyBank').value = data.companyBank;
-      if (data.companyBik && !getValue('companyBik')) document.getElementById('companyBik').value = data.companyBik;
-      if (data.companyAccount && !getValue('companyAccount')) document.getElementById('companyAccount').value = data.companyAccount;
-      if (data.email && !getValue('email')) document.getElementById('email').value = data.email;
-      if (data.phone && !getValue('phone')) document.getElementById('phone').value = data.phone;
-      saveDraft();
-      status.className = 'status ok';
-      status.textContent = '✓ Данные заказчика подтянуты из реестра.';
-    } else {
-      status.className = 'status';
-      status.textContent = '';
-    }
-  } catch (e) {
-    status.className = 'status';
-    status.textContent = '';
-  }
-}
-
 // ============ СЛЕДУЮЩИЙ НОМЕР ============
 async function fetchNextNumber() {
+  const loc = getValue('location');
+  if (!loc || !LOCATIONS[loc]) return;
+
   const status = document.getElementById('status');
   status.className = 'status info';
   status.textContent = 'Запрос следующего номера...';
+
   try {
-    const res = await fetch(APPS_SCRIPT_URL + '?action=nextNumber');
+    const res = await fetch(APPS_SCRIPT_URL + '?action=nextNumber&location=' + encodeURIComponent(loc));
     const data = await res.json();
     if (data.number) {
       document.getElementById('contractNumber').value = data.number;
@@ -609,14 +539,6 @@ function clearForm() {
   document.getElementById('locInfo').className = 'loc-info';
   document.getElementById('discount').value = '';
   document.getElementById('status').className = 'status';
-  document.querySelectorAll('input').forEach(el => el.classList.remove('error', 'valid'));
-}
-
-// ============ ТЕМА ============
-function toggleTheme() {
-  document.body.classList.toggle('dark-theme');
-  const isDark = document.body.classList.contains('dark-theme');
-  localStorage.setItem('darkTheme', isDark ? '1' : '0');
 }
 
 // ============ ГЕНЕРАЦИЯ ============
@@ -640,15 +562,10 @@ async function generateAndDownload() {
     }
   }
 
-  if (!validateBinField()) { status.className = 'status err'; status.textContent = 'Проверьте БИН'; return; }
-  if (!validateEmailField()) { status.className = 'status err'; status.textContent = 'Проверьте email'; return; }
-  if (!validatePhoneField()) { status.className = 'status err'; status.textContent = 'Проверьте телефон'; return; }
-
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Формирование...';
   const data = getFormData();
 
-  // Отправка в Google Таблицу
   try {
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -694,9 +611,19 @@ function downloadTemplate() {
     email: '_____________________', phone: '_____________________'
   };
 
-  downloadWord(data);
+  const html = buildDocumentHTML(data);
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Шаблон ${L.name}.doc`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
   status.className = 'status ok';
-  status.textContent = '✓ Пустой шаблон для «' + L.name + '» скачан.';
+  status.textContent = '✓ Шаблон «' + L.name + '» скачан.';
 }
 
 function buildDocumentHTML(d) {
@@ -718,11 +645,7 @@ function buildDocumentHTML(d) {
       xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8"><title>${docTitle}</title>
 <style>
-@page {
-  size: A4;
-  margin: 1.5cm 1.5cm 1.5cm 1.5cm;
-  mso-page-orientation: portrait;
-}
+@page { size: A4; margin: 1.5cm 1.5cm 1.5cm 1.5cm; }
 body { font-family: "Times New Roman", serif; font-size: 11pt; line-height: 1.25; margin: 0; }
 h1 { font-size: 13pt; text-align: center; text-transform: uppercase; margin: 6pt 0; }
 h2 { font-size: 11pt; text-transform: uppercase; margin-top: 10pt; margin-bottom: 4pt; }
@@ -743,30 +666,23 @@ a { color: #000; text-decoration: none; }
 
 function downloadWord(d) {
   const L = LOCATIONS[d.location];
-  const docTitle = L.isB2B
-    ? 'Договор об оказании гостиничных услуг'
-    : 'Договор возмездного оказания гостиничных услуг';
-
   const html = buildDocumentHTML(d);
-
   const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${docTitle}_${d.contractNumber}_${d.companyName}.doc`;
+  a.download = `Договор ${L.name} ${d.contractNumber}.doc`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
-// ============ РАЗРЫВ СТРАНИЦЫ ============
 function pageBreak() {
   return `<br clear="all">
 <p style="page-break-before: always; margin: 0; font-size: 1pt; line-height: 1pt;">&nbsp;</p>`;
 }
 
-// ============ ТАБЛИЦА КАТЕГОРИЙ ============
 function roomsTable(L) {
   let rows = '';
   L.rooms.forEach((r, i) => {
@@ -792,14 +708,12 @@ function roomsTable(L) {
   </table>`;
 }
 
-// ============ ТЕЛЕФОН КАК ССЫЛКА ============
 function phoneLink(phone) {
   if (!phone) return phone;
   const clean = phone.replace(/[^\d+]/g, '');
   return `<a href="tel:${clean}">${phone}</a>`;
 }
 
-// ============ ЧИСЛА ПРОПИСЬЮ ============
 function numToWords(n) {
   const words = { 30: 'тридцать', 50: 'пятьдесят', 100: 'сто' };
   return words[n] || n;
@@ -938,7 +852,7 @@ ${roomsTable(L)}
   <li>Доплата за второго человека — ${L.extraPerson} тг/сутки.</li>
   <li>Ребёнок до 7 лет — бесплатно.</li>
   <li>Ребёнок старше 7 лет — ${L.extraChild} тг/сутки.</li>
-  ${L.spa === 'включена' ? '<li>SPA-зона — включена в тариф.</li>' : ''}
+  ${L.spa === 'включена' || L.spa === 'включена во всех категориях' ? '<li>SPA-зона — включена в тариф.</li>' : ''}
   <li>Высокоскоростной интернет — включён.</li>
 </ul>
 
@@ -1127,7 +1041,6 @@ ${roomsTable(L)}
   <li>Доплата за второго человека — ${L.extraPerson} тг/сутки.</li>
   <li>Ребёнок до 7 лет — бесплатно.</li>
   <li>Ребёнок старше 7 лет — ${L.extraChild} тг/сутки.</li>
-  ${L.spa === 'включена' ? '<li>SPA-зона — включена в тариф.</li>' : ''}
   <li>Высокоскоростной интернет — включён.</li>
 </ul>
 
@@ -1162,10 +1075,6 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('contractDate').value = today;
 
   loadDraft();
-
-  if (localStorage.getItem('darkTheme') === '1') {
-    document.body.classList.add('dark-theme');
-  }
 
   DRAFT_FIELDS.forEach(id => {
     const el = document.getElementById(id);
