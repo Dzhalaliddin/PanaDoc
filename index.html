@@ -105,6 +105,7 @@
 
 
   .invalid { border-color: #d32f2f !important; background: #fff5f5; }
+  .warn { border-color: #f59e0b !important; background: #fffaf0; }
 
   @media (max-width: 600px) {
     body { padding: 15px 10px; }
@@ -229,7 +230,7 @@
 <script>
 // ============ КОНФИГ ============
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj_qMalCehP2WyxLAm_KIz3Md9TLU6Szaf5IoVAZfKAHZO_Gq3CZFW4R5MYOgWGIl5FA/exec';
-const VERSION = '2.0';
+const VERSION = '2.2';
 document.getElementById('versionInfo').textContent = 'v' + VERSION;
 
 // ============ ДАННЫЕ ============
@@ -639,7 +640,7 @@ function clearForm() {
   });
   try { localStorage.clear(); } catch (e) {}
   saveDraft();
-  document.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
+  document.querySelectorAll('.invalid, .warn').forEach(e => e.classList.remove('invalid', 'warn'));
   lastRegisteredKey = '';
   lastLookupBin = '';
   document.getElementById('locInfo').className = 'loc-info';
@@ -653,11 +654,15 @@ const REQUIRED_FIELDS = {
   companyBin: 'БИН / ИИН', directorName: 'ФИО директора'
 };
 
+const OPTIONAL_FIELDS = {
+  companyAddress: 'Юридический адрес', companyBank: 'Банк', companyBik: 'БИК',
+  companyAccount: 'Номер счёта', companyKbe: 'КБе', phone: 'Телефон'
+};
+
 function validateForm() {
   const status = document.getElementById('status');
-  document.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
-  const problems = [];
-  const bad = [];
+  document.querySelectorAll('.invalid, .warn').forEach(e => e.classList.remove('invalid', 'warn'));
+  const problems = [], bad = [];
   Object.keys(REQUIRED_FIELDS).forEach(id => {
     const val = getValue(id);
     if (!val || (id === 'location' && !LOCATIONS[val])) {
@@ -666,12 +671,23 @@ function validateForm() {
       problems.push('БИН / ИИН (нужно ровно 12 цифр)'); bad.push(id);
     }
   });
-  if (!bad.length) return true;
+  // необязательные поля подсвечиваем сразу, одновременно с обязательными
+  const empty = Object.keys(OPTIONAL_FIELDS).filter(id => !getValue(id));
   bad.forEach(id => document.getElementById(id).classList.add('invalid'));
-  document.getElementById(bad[0]).focus();
-  status.className = 'status err';
-  status.textContent = 'Не заполнено: ' + problems.join(', ');
-  return false;
+  empty.forEach(id => document.getElementById(id).classList.add('warn'));
+  const names = empty.map(id => OPTIONAL_FIELDS[id]).join(', ');
+
+  if (bad.length) {
+    document.getElementById(bad[0]).focus();
+    status.className = 'status err';
+    status.textContent = 'Не заполнено (обязательно): ' + problems.join(', ') +
+      (empty.length ? '. Также пусто: ' + names : '');
+    return false;
+  }
+  if (!empty.length) return true;
+  status.className = 'status info';
+  status.textContent = 'Не заполнено: ' + names;
+  return confirm('Не заполнены поля: ' + names + '.\nВ договоре на их месте останутся пустые линии. Сформировать всё равно?');
 }
 
 // ============ ГЕНЕРАЦИЯ ============
@@ -1232,9 +1248,9 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('companyBin').addEventListener('input', lookupByBin);
-  Object.keys(REQUIRED_FIELDS).forEach(id => {
+  Object.keys(Object.assign({}, REQUIRED_FIELDS, OPTIONAL_FIELDS)).forEach(id => {
     const el = document.getElementById(id);
-    ['input', 'change'].forEach(ev => el.addEventListener(ev, () => el.classList.remove('invalid')));
+    ['input', 'change'].forEach(ev => el.addEventListener(ev, () => el.classList.remove('invalid', 'warn')));
   });
 });
 </script>
