@@ -27,20 +27,6 @@
   .row { display: flex; gap: 15px; margin-bottom: 15px; }
   .row > div { flex: 1; }
   label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #333; }
-  label .hint-icon {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    background: #ccd2dc;
-    color: #fff;
-    border-radius: 50%;
-    text-align: center;
-    font-size: 10px;
-    line-height: 14px;
-    font-weight: bold;
-    cursor: help;
-    margin-left: 4px;
-  }
   input, select {
     width: 100%;
     padding: 9px 11px;
@@ -155,9 +141,9 @@
 
   <div class="row">
     <div>
-      <label>Номер договора *</label>
-      <input type="text" id="contractNumber" placeholder="Например: KS-01.2026">
-      <button class="next-number-btn" onclick="fetchNextNumber()">→ Получить следующий номер</button>
+      <label>Номер договора * (подставляется автоматически)</label>
+      <input type="text" id="contractNumber" placeholder="Выберите локацию — номер появится сам">
+      <button class="next-number-btn" onclick="fetchNextNumber()">↻ Обновить номер</button>
     </div>
     <div>
       <label>Дата договора *</label>
@@ -172,7 +158,7 @@
     </div>
     <div>
       <label>БИН / ИИН *</label>
-      <input type="text" id="companyBin" placeholder="123456789012">
+      <input type="text" id="companyBin" placeholder="123456789012" maxlength="12" inputmode="numeric">
     </div>
   </div>
 
@@ -211,8 +197,8 @@
 
   <div class="row">
     <div>
-      <label>Email</label>
-      <input type="email" id="email" placeholder="info@company.kz">
+      <label>КБе</label>
+      <input type="text" id="companyKbe" placeholder="17">
     </div>
     <div>
       <label>Телефон</label>
@@ -243,7 +229,7 @@
 <script>
 // ============ КОНФИГ ============
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj_qMalCehP2WyxLAm_KIz3Md9TLU6Szaf5IoVAZfKAHZO_Gq3CZFW4R5MYOgWGIl5FA/exec';
-const VERSION = '1.4';
+const VERSION = '1.6';
 document.getElementById('versionInfo').textContent = 'v' + VERSION;
 
 // ============ ДАННЫЕ ============
@@ -256,6 +242,7 @@ const LOCATIONS = {
   semey: {
     name: 'Pana Complex Semey',
     prefix: 'PUS',
+    city: 'г. Семей',
     type: 'Прямой',
     hotelName: 'Pana Complex Semey',
     hotelAddress: 'ВКО, г. Семей, ул. Рымбека Ильяшева, дом 45А',
@@ -292,6 +279,7 @@ const LOCATIONS = {
   charyn: {
     name: 'Pana Unique Charyn',
     prefix: 'PUC',
+    city: 'Алматинская область',
     type: 'B2B',
     hotelName: 'Pana Unique Charyn',
     hotelAddress: 'Палуана улица, 1в/2, Енбекшиказахский район, Алматинская область',
@@ -322,6 +310,7 @@ const LOCATIONS = {
   kolsay: {
     name: 'KOLSAY NOMAD',
     prefix: 'PUK',
+    city: 'с. Саты',
     type: 'B2B',
     hotelName: 'KOLSAY NOMAD',
     hotelAddress: 'Улица Ултаракова, 5а, с. Саты, Кегенский район, Алматинская область',
@@ -340,7 +329,7 @@ const LOCATIONS = {
     cancelDays: 15,
     breakfast: 'включён во всех категориях',
     spa: 'нет',
-    paymentTerms: 'оплата не позднее 10 числа месяца, следующего за отчётным',
+    paymentTerms: '100% предоплата не позднее чем за 2 (два) банковских дня до даты заезда',
     extraPerson: '15 000',
     extraChild: '15 000',
     rooms: [
@@ -361,6 +350,7 @@ const LOCATIONS = {
   ayusai: {
     name: 'Pana Ayusai',
     prefix: 'PA',
+    city: 'г. Алматы',
     type: 'B2B',
     hotelName: 'Pana Ayusai',
     hotelAddress: 'Казахстан, г. Алматы, Бостандыкский район, ущелье Аюсай, улица Кокшокы, 1в/1',
@@ -379,7 +369,7 @@ const LOCATIONS = {
     cancelDays: 15,
     breakfast: 'по категориям',
     spa: 'нет',
-    paymentTerms: 'оплата не позднее 10 числа месяца, следующего за отчётным',
+    paymentTerms: '100% предоплата не позднее чем за 2 (два) банковских дня до даты заезда',
     extraPerson: '10 000',
     extraChild: '10 000',
     rooms: [
@@ -393,6 +383,7 @@ const LOCATIONS = {
   kainar: {
     name: 'Kainar',
     prefix: 'KS',
+    city: 'г. Шымкент',
     type: 'Прямой',
     hotelName: 'Kainar',
     hotelAddress: 'г. Шымкент, пр. Байдибек би, 126',
@@ -435,10 +426,14 @@ function getValue(id) {
 
 function formatDateRu(isoDate) {
   if (!isoDate) return '«___» _________ 20___ г.';
-  const d = new Date(isoDate);
+  // Разбираем строку вручную, чтобы не было сдвига дня из-за часового пояса
+  const parts = isoDate.split('-');
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
   const months = ['января','февраля','марта','апреля','мая','июня',
                   'июля','августа','сентября','октября','ноября','декабря'];
-  return `«${d.getDate()}» ${months[d.getMonth()]} ${d.getFullYear()} г.`;
+  return `«${day}» ${months[m]} ${y} г.`;
 }
 
 function onLocationChange() {
@@ -446,18 +441,26 @@ function onLocationChange() {
   const info = document.getElementById('locInfo');
   if (!loc || !LOCATIONS[loc]) {
     document.getElementById('discount').value = '';
+    document.getElementById('contractNumber').value = '';
     info.className = 'loc-info';
+    saveDraft();
     return;
   }
+  showLocationInfo(loc);
+  // Новая локация — новый номер подставляем автоматически
+  document.getElementById('contractNumber').value = '';
+  fetchNextNumber();
+}
+
+function showLocationInfo(loc) {
   const L = LOCATIONS[loc];
+  const info = document.getElementById('locInfo');
   document.getElementById('discount').value = L.discount + '%';
   info.className = 'loc-info visible';
   info.innerHTML = `<b>${L.name}</b><br>
     Адрес объекта: ${L.hotelAddress}<br>
     Скидка: <b>${L.discount}%</b> · Минимум: <b>${L.minNights} номеро-ночей за 12 мес.</b><br>
     Отмена: <b>${L.cancelDays} суток</b> · Префикс: <b>${L.prefix}</b>`;
-
-  fetchNextNumber();
 }
 
 function getFormData() {
@@ -473,7 +476,7 @@ function getFormData() {
     companyBank: getValue('companyBank'),
     companyBik: getValue('companyBik'),
     companyAccount: getValue('companyAccount'),
-    email: getValue('email'),
+    companyKbe: getValue('companyKbe'),
     phone: getValue('phone')
   };
 }
@@ -485,7 +488,7 @@ async function fetchNextNumber() {
 
   const status = document.getElementById('status');
   status.className = 'status info';
-  status.textContent = 'Запрос следующего номера...';
+  status.textContent = 'Запрос номера договора...';
 
   try {
     const res = await fetch(APPS_SCRIPT_URL + '?action=nextNumber&location=' + encodeURIComponent(loc));
@@ -494,7 +497,7 @@ async function fetchNextNumber() {
       document.getElementById('contractNumber').value = data.number;
       saveDraft();
       status.className = 'status ok';
-      status.textContent = '✓ Предложен номер: ' + data.number;
+      status.textContent = '✓ Номер договора: ' + data.number;
     } else {
       status.className = 'status err';
       status.textContent = 'Не удалось получить номер';
@@ -505,24 +508,60 @@ async function fetchNextNumber() {
   }
 }
 
+// ============ АВТОЗАПОЛНЕНИЕ ПО БИН/ИИН ============
+let lastLookupBin = '';
+
+async function lookupByBin() {
+  const bin = getValue('companyBin');
+  if (!/^\d{12}$/.test(bin) || bin === lastLookupBin) return;
+  lastLookupBin = bin;
+
+  const status = document.getElementById('status');
+  try {
+    const res = await fetch(APPS_SCRIPT_URL + '?action=getByBin&bin=' + encodeURIComponent(bin));
+    const r = await res.json();
+    if (!r.found) return;
+    if (!confirm('Клиент найден в реестре: ' + (r.companyName || bin) + '.\nПодставить его реквизиты?')) return;
+
+    const map = {
+      companyName: r.companyName, directorName: r.directorName, companyAddress: r.companyAddress,
+      companyBank: r.companyBank, companyBik: r.companyBik, companyAccount: r.companyAccount,
+      companyKbe: r.companyKbe, phone: r.phone
+    };
+    Object.keys(map).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = map[id] || '';
+    });
+    saveDraft();
+    status.className = 'status ok';
+    status.textContent = '✓ Реквизиты подставлены из реестра: ' + (r.companyName || bin);
+  } catch (e) {
+    // тихо игнорируем: автозаполнение — удобство, а не обязательная часть
+  }
+}
+
 // ============ ЧЕРНОВИК ============
 const DRAFT_FIELDS = ['location','contractNumber','contractDate','companyName','companyBin',
                      'directorName','directorBasis','companyAddress','companyBank','companyBik',
-                     'companyAccount','email','phone'];
+                     'companyAccount','companyKbe','phone'];
 
 function saveDraft() {
-  DRAFT_FIELDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) localStorage.setItem('draft_' + id, el.value);
-  });
+  try {
+    DRAFT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) localStorage.setItem('draft_' + id, el.value);
+    });
+  } catch (e) {}
 }
 
 function loadDraft() {
-  DRAFT_FIELDS.forEach(id => {
-    const el = document.getElementById(id);
-    const saved = localStorage.getItem('draft_' + id);
-    if (el && saved) el.value = saved;
-  });
+  try {
+    DRAFT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      const saved = localStorage.getItem('draft_' + id);
+      if (el && saved) el.value = saved;
+    });
+  } catch (e) {}
 }
 
 function clearForm() {
@@ -535,13 +574,17 @@ function clearForm() {
       else el.value = '';
     }
   });
-  localStorage.clear();
+  try { localStorage.clear(); } catch (e) {}
+  lastRegisteredKey = '';
+  lastLookupBin = '';
   document.getElementById('locInfo').className = 'loc-info';
   document.getElementById('discount').value = '';
   document.getElementById('status').className = 'status';
 }
 
 // ============ ГЕНЕРАЦИЯ ============
+let lastRegisteredKey = '';  // чтобы повторное скачивание того же договора не создавало дубль в реестре
+
 async function generateAndDownload() {
   const status = document.getElementById('status');
   const btn = document.getElementById('downloadBtn');
@@ -553,7 +596,7 @@ async function generateAndDownload() {
     return;
   }
 
-  const required = ['contractNumber','contractDate','companyName','companyBin','directorName'];
+  const required = ['contractDate','companyName','companyBin','directorName'];
   for (const id of required) {
     if (!getValue(id)) {
       status.className = 'status err';
@@ -562,22 +605,59 @@ async function generateAndDownload() {
     }
   }
 
+  if (!/^\d{12}$/.test(getValue('companyBin'))) {
+    status.className = 'status err';
+    status.textContent = 'БИН/ИИН должен состоять ровно из 12 цифр';
+    return;
+  }
+
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Формирование...';
-  const data = getFormData();
 
-  try {
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-  } catch (e) { console.warn('Ошибка отправки:', e); }
+  // Если номера нет — получаем автоматически
+  if (!getValue('contractNumber')) await fetchNextNumber();
+
+  const data = getFormData();
+  const key = JSON.stringify(data);
+  let registered = true;
+  let message = '✓ Договор сформирован и записан в реестр.';
+
+  if (key !== lastRegisteredKey) {
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(data)   // text/plain — без preflight, ответ читается
+      });
+      const r = await res.json();
+      if (r.status === 'ok') {
+        if (r.number && r.number !== data.contractNumber) {
+          // номер был занят — таблица выдала следующий свободный
+          data.contractNumber = r.number;
+          document.getElementById('contractNumber').value = r.number;
+          saveDraft();
+          message = '✓ Договор записан в реестр. Номер был занят, присвоен новый: ' + r.number;
+        }
+        lastRegisteredKey = JSON.stringify(getFormData());
+      } else {
+        registered = false;
+      }
+    } catch (e) {
+      console.warn('Ошибка отправки:', e);
+      registered = false;
+    }
+  } else {
+    message = '✓ Договор сформирован повторно (запись в реестре уже есть).';
+  }
 
   downloadWord(data);
-  status.className = 'status ok';
-  status.textContent = '✓ Договор сформирован и отправлен в реестр.';
+
+  if (registered) {
+    status.className = 'status ok';
+    status.textContent = message;
+  } else {
+    status.className = 'status err';
+    status.textContent = 'Договор скачан, но НЕ записан в реестр — проверьте связь и повторите.';
+  }
   btn.disabled = false;
   btn.innerHTML = '📄 Сформировать и скачать договор';
 }
@@ -608,7 +688,7 @@ function downloadTemplate() {
     directorName: '_____________________', directorBasis: 'Устава',
     companyAddress: '_____________________', companyBank: '_____________________',
     companyBik: '_____________________', companyAccount: '_____________________',
-    email: '_____________________', phone: '_____________________'
+    companyKbe: '_____________________', phone: '_____________________'
   };
 
   const html = buildDocumentHTML(data);
@@ -723,7 +803,7 @@ function numToWords(n) {
 function buildDirect(d, L, dateRu, discountFactor, docTitle) {
   return `
 <h1>${docTitle} № ${d.contractNumber}</h1>
-<p>г. Алматы</p>
+<p>${L.city}</p>
 <p>${dateRu}</p>
 
 <p><span class="bold">${L.execFullName}</span>, именуемое в дальнейшем <span class="bold">«Исполнитель»</span>, в лице Директора ${L.execDirector}, действующего на основании ${BASIS}, с одной стороны, и</p>
@@ -738,19 +818,13 @@ function buildDirect(d, L, dateRu, discountFactor, docTitle) {
 <h2>2. Порядок и условия предоставления услуг</h2>
 <p>2.1. Бронирование может быть совершено по электронной почте, телефону или через мессенджер WhatsApp.</p>
 <p>2.2. Контакты для бронирования: e-mail: ${L.bookingEmail}, телефон: ${phoneLink(L.bookingPhone)}.</p>
-<p>2.3. При бронировании необходимо внести ${L.paymentTerms}.</p>
+<p>2.3. При бронировании необходимо внести ${L.paymentTerms.replace('100% предоплата', '100% предоплату')}.</p>
 <p>2.4. Бронирование, изменение сроков проживания, отмена брони производятся на основании письменных заявок Заказчика.</p>
 <p>2.5. В течение 24 (двадцати четырёх) часов после получения заявки Исполнитель направляет Заказчику подтверждение бронирования по электронной почте или WhatsApp.</p>
 <p>2.6. Заявка должна содержать: количество прибывающих лиц с ФИО; сроки пребывания с датой и временем заезда/выезда; количество и тип номеров; требования по дополнительным услугам.</p>
 <p>2.7. Условия отмены бронирования регулируются разделом 5 Договора.</p>
 <p>2.8. Все дополнительные услуги, не указанные в Приложении к Договору, оплачиваются дополнительно.</p>
-<p>2.9. Ранним заездом считается заселение до 14:00. Поздним выездом — выезд после 12:00. Оплата:</p>
-<ul>
-  <li>ранний заезд 01:00–06:00 — полный тариф за предыдущие сутки;</li>
-  <li>ранний заезд 06:00–14:00 — 50% суточной стоимости;</li>
-  <li>поздний выезд 12:00–18:00 — 50% суточной стоимости;</li>
-  <li>поздний выезд после 18:00 — полный тариф.</li>
-</ul>
+<p>2.9. Ранним заездом считается заселение до 14:00. Поздним выездом — выезд после 12:00. Ранний заезд и поздний выезд предоставляются при наличии свободных номеров и оплачиваются дополнительно в размере 50% стоимости номера за сутки (за каждую услугу).</p>
 <p>2.10. Размещение менее 24 часов (day use) — полная суточная стоимость.</p>
 
 <h2>3. Права и обязанности сторон</h2>
@@ -796,7 +870,7 @@ function buildDirect(d, L, dateRu, discountFactor, docTitle) {
 
 <h2>10. Срок действия Договора</h2>
 <p>10.1. Договор вступает в силу с момента подписания и действует <span class="bold">бессрочно</span> до момента расторжения одной из Сторон.</p>
-<p>10.2. Каждая Сторона вправе расторгнуть Договор в одностороннем порядке, уведомив другую Сторону письменно не менее чем за 30 (тридцать) календарных дней.</p>
+<p>10.2. Каждая Сторона вправе расторгнуть Договор в одностороннем порядке, уведомив другую Сторону письменно не менее чем за 15 (пятнадцать) календарных дней.</p>
 <p>10.3. Бронирования, подтверждённые до даты расторжения, обслуживаются по тарифам, действовавшим на дату подтверждения, до фактического выезда Гостей.</p>
 
 <h2>11. Заключительные положения</h2>
@@ -824,6 +898,7 @@ function buildDirect(d, L, dateRu, discountFactor, docTitle) {
       Адрес: ${d.companyAddress || '_______________________'}<br>
       БИН (ИИН): ${d.companyBin}<br>
       Банк: ${d.companyBank || '_______________________'}<br>
+      КБе: ${d.companyKbe || '_______________________'}<br>
       БИК: ${d.companyBik || '_______________________'}<br>
       Номер счёта: ${d.companyAccount || '_______________________'}</p>
       <p>Директор _______________ ${d.directorName}</p>
@@ -839,8 +914,8 @@ ${pageBreak()}
 <p>Отель: <span class="bold">${L.hotelName}</span></p>
 <p>Адрес: ${L.hotelAddress}</p>
 <p>Стандартное время заезда/выезда: заезд 14:00, выезд 12:00.</p>
-<p>Ранний заезд: 06:00–11:30 — 50%; 01:00–06:00 — полный тариф.</p>
-<p>Поздний выезд: 14:00–18:00 — 50%; после 18:00 — полный тариф.</p>
+<p>Ранний заезд (до 14:00) — +50% к стоимости номера за сутки.</p>
+<p>Поздний выезд (после 12:00) — +50% к стоимости номера за сутки.</p>
 
 ${roomsTable(L)}
 
@@ -879,7 +954,7 @@ function buildB2B(d, L, dateRu, discountFactor, docTitle) {
   return `
 <h1>${docTitle} № ${d.contractNumber}</h1>
 <p>с гостиничным комплексом «${L.hotelName}»</p>
-<p>г. Алматы</p>
+<p>${L.city}</p>
 <p>${dateRu}</p>
 
 <p><span class="bold">${L.execFullName}</span>, именуемое в дальнейшем <span class="bold">«Исполнитель»</span>, в лице Директора ${L.execDirector}, действующего на основании ${BASIS}, с одной стороны, и</p>
@@ -927,15 +1002,7 @@ function buildB2B(d, L, dateRu, discountFactor, docTitle) {
 <p>5.1. Номера предоставляются с 14:00 (расчётный час) дня заезда. Выезд — до 12:00 дня отъезда.</p>
 <p>5.2. Дополнительные расходы, не согласованные в заявке, оплачиваются Гостями самостоятельно, если иное не указано в заявке.</p>
 <p>5.3. При невозможности размещения Гостей с гарантированным бронированием Исполнитель размещает их в равноценной гостинице, согласованной Сторонами, и оплачивает переезд.</p>
-<p>5.4. Ранний заезд / поздний выезд:</p>
-<ul>
-  <li>задержка выезда до 15:00 — допускается при наличии свободных номеров;</li>
-  <li>задержка выезда 15:00–18:00 — 50% суточной стоимости;</li>
-  <li>задержка выезда после 18:00 — полная суточная стоимость;</li>
-  <li>ранний заезд после 9:00 — допускается при наличии свободных номеров;</li>
-  <li>ранний заезд 06:00–09:00 — 50% суточной стоимости;</li>
-  <li>ранний заезд до 06:00 — полная суточная стоимость.</li>
-</ul>
+<p>5.4. Ранний заезд (до 14:00) и поздний выезд (после 12:00) предоставляются при наличии свободных номеров и оплачиваются дополнительно в размере 50% стоимости номера за сутки (за каждую услугу).</p>
 
 <h2>6. Тарифы и порядок расчётов</h2>
 <p>6.1. Стоимость услуг формируется исходя из тарифов Приложения к Договору. Стоимость услуг включает все затраты Исполнителя.</p>
@@ -947,7 +1014,7 @@ function buildB2B(d, L, dateRu, discountFactor, docTitle) {
 <p>6.5. В случае невыполнения условия п. 6.3 Договора корпоративная скидка <span class="bold">приостанавливается на следующие 12 (двенадцать) месяцев</span>. По итогам следующего периода, при выполнении условия, скидка возобновляется.</p>
 <p>6.6. Скидка не аннулируется бессрочно. Приостановка действует только на один период.</p>
 <p>6.7. Сверка взаиморасчётов производится Сторонами один раз в месяц.</p>
-<p>6.8. ${L.paymentTerms.charAt(0).toUpperCase() + L.paymentTerms.slice(1)}.</p>
+<p>6.8. Оплата — ${L.paymentTerms}.</p>
 <p>6.9. По факту оказания услуг Исполнитель направляет Заказчику реестр оказанных услуг по форме, согласованной Сторонами, для проведения сверки. Период согласования — 2 рабочих дня.</p>
 <p>6.10. Исполнитель вправе пересмотреть тарифы, уведомив Заказчика за 30 календарных дней. Изменение тарифов не распространяется на уже подтверждённые бронирования.</p>
 
@@ -977,12 +1044,12 @@ function buildB2B(d, L, dateRu, discountFactor, docTitle) {
 
 <h2>11. Срок действия Договора</h2>
 <p>11.1. Договор вступает в силу с момента подписания и действует <span class="bold">бессрочно</span> до момента расторжения одной из Сторон.</p>
-<p>11.2. Каждая Сторона вправе расторгнуть Договор в одностороннем порядке, уведомив другую Сторону письменно не менее чем за 30 (тридцать) календарных дней.</p>
+<p>11.2. Каждая Сторона вправе расторгнуть Договор в одностороннем порядке, уведомив другую Сторону письменно не менее чем за 15 (пятнадцать) календарных дней.</p>
 <p>11.3. Бронирования, подтверждённые до даты расторжения, обслуживаются по тарифам, действовавшим на дату подтверждения, до фактического выезда Гостей.</p>
 
 <h2>12. Дополнение условий Договора</h2>
 <p>12.1. Изменения, дополнения и приложения совершаются в письменной форме за подписью уполномоченных представителей.</p>
-<p>12.2. Любая Сторона вправе расторгнуть Договор, уведомив другую Сторону за 30 дней. Расторжение не освобождает от обязательств по оплате и возврату средств.</p>
+<p>12.2. Расторжение Договора не освобождает Стороны от обязательств по оплате и возврату средств.</p>
 
 <h2>13. Заключительные положения</h2>
 <p>13.1. Договор подписан в 2 (двух) подлинных экземплярах на русском языке, по одному для каждой Стороны.</p>
@@ -1011,9 +1078,9 @@ function buildB2B(d, L, dateRu, discountFactor, docTitle) {
       Почтовый адрес: ${d.companyAddress || '_______________________'}<br>
       БИН (ИИН): ${d.companyBin}<br>
       Банк: ${d.companyBank || '_______________________'}<br>
+      КБе: ${d.companyKbe || '_______________________'}<br>
       БИК: ${d.companyBik || '_______________________'}<br>
-      Номер счёта: ${d.companyAccount || '_______________________'}<br>
-      E-mail: ${d.email || '_______________________'}</p>
+      Номер счёта: ${d.companyAccount || '_______________________'}</p>
       <p>Директор _______________ ${d.directorName}</p>
       <p>М.П.</p>
     </td>
@@ -1027,8 +1094,8 @@ ${pageBreak()}
 <p>Отель: <span class="bold">${L.hotelName}</span></p>
 <p>Адрес: ${L.hotelAddress}</p>
 <p>Стандартное время заезда/выезда: заезд 14:00, выезд 12:00.</p>
-<p>Ранний заезд: 06:00–11:30 — 50%; 01:00–06:00 — полный тариф.</p>
-<p>Поздний выезд: 14:00–18:00 — 50%; после 18:00 — полный тариф.</p>
+<p>Ранний заезд (до 14:00) — +50% к стоимости номера за сутки.</p>
+<p>Поздний выезд (после 12:00) — +50% к стоимости номера за сутки.</p>
 
 ${roomsTable(L)}
 
@@ -1076,10 +1143,19 @@ window.addEventListener('DOMContentLoaded', function() {
 
   loadDraft();
 
+  // Если локация уже выбрана (из черновика) — показываем инфо и подставляем свежий номер
+  const loc = getValue('location');
+  if (loc && LOCATIONS[loc]) {
+    showLocationInfo(loc);
+    fetchNextNumber();
+  }
+
   DRAFT_FIELDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', saveDraft);
   });
+
+  document.getElementById('companyBin').addEventListener('input', lookupByBin);
 });
 </script>
 
