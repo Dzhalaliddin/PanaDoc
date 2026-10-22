@@ -14,6 +14,7 @@
     color: #222;
   }
   .container {
+    position: relative;
     max-width: 780px;
     margin: 0 auto;
     background: #fff;
@@ -100,6 +101,11 @@
   }
   .next-number-btn:hover { background: #dfe8f7; }
 
+  input::placeholder { color: #aab2c0; }
+
+
+  .invalid { border-color: #d32f2f !important; background: #fff5f5; }
+
   @media (max-width: 600px) {
     body { padding: 15px 10px; }
     .container { padding: 20px; }
@@ -113,17 +119,18 @@
 <body>
 
 <div class="container">
-  <h1>Генератор договоров</h1>
+  <input type="hidden" id="docLang" value="ru">
+  <h1 data-i18n="title">Генератор договоров</h1>
   <div class="subtitle">
-    <span>PANA HOTELS — гостиничные услуги</span>
+    <span data-i18n="sub">PANA HOTELS — гостиничные услуги</span>
     <span class="version" id="versionInfo"></span>
   </div>
 
   <div class="row">
     <div>
-      <label>Локация *</label>
+      <label data-i18n="loc">Локация *</label>
       <select id="location" onchange="onLocationChange()">
-        <option value="">— выберите локацию —</option>
+        <option value="" data-i18n="locSel">— выберите локацию —</option>
         <option value="semey">Pana Complex Semey</option>
         <option value="charyn">Pana Unique Charyn</option>
         <option value="kolsay">KOLSAY NOMAD</option>
@@ -132,96 +139,89 @@
       </select>
     </div>
     <div>
-      <label>Скидка, %</label>
+      <label data-i18n="disc">Скидка, %</label>
       <input type="text" id="discount" readonly>
     </div>
   </div>
 
   <div class="loc-info" id="locInfo"></div>
 
+
   <div class="row">
     <div>
-      <label>Номер договора * (подставляется автоматически)</label>
-      <input type="text" id="contractNumber" placeholder="Выберите локацию — номер появится сам">
-      <button class="next-number-btn" onclick="fetchNextNumber()">↻ Обновить номер</button>
+      <label data-i18n="num">Номер договора * (подставляется автоматически)</label>
+      <input type="text" id="contractNumber" placeholder="Выберите локацию — номер появится сам" data-i18n-ph="numPh">
+      <button class="next-number-btn" onclick="fetchNextNumber()" data-i18n="refresh">↻ Обновить номер</button>
     </div>
     <div>
-      <label>Дата договора *</label>
+      <label data-i18n="date">Дата договора *</label>
       <input type="date" id="contractDate">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>Название организации *</label>
-      <input type="text" id="companyName" placeholder="ТОО «Ромашка»">
+      <label data-i18n="company">Название организации *</label>
+      <input type="text" id="companyName" placeholder="ТОО «NOVOTEL»" data-i18n-ph="companyPh">
     </div>
     <div>
-      <label>БИН / ИИН *</label>
+      <label data-i18n="bin">БИН / ИИН *</label>
       <input type="text" id="companyBin" placeholder="123456789012" maxlength="12" inputmode="numeric">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>ФИО директора *</label>
-      <input type="text" id="directorName" placeholder="Иванов И.И.">
+      <label data-i18n="dirname">ФИО директора *</label>
+      <input type="text" id="directorName" placeholder="Ахметов А.А." data-i18n-ph="dirPh">
     </div>
     <div>
-      <label>Основание</label>
-      <input type="text" id="directorBasis" value="Устава">
-    </div>
-  </div>
-
-  <div class="row">
-    <div>
-      <label>Юридический адрес</label>
-      <input type="text" id="companyAddress" placeholder="г. Алматы, ул. ...">
-    </div>
-    <div>
-      <label>Банк</label>
-      <input type="text" id="companyBank" placeholder="АО «Kaspi Bank»">
+      <label data-i18n="basis">Основание (на основании чего действует)</label>
+      <input type="text" id="directorBasis" placeholder="например: Устава, Доверенности № 5 от 01.01.2026, Приказа" data-i18n-ph="basisPh">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>БИК</label>
+      <label data-i18n="address">Юридический адрес</label>
+      <input type="text" id="companyAddress" placeholder="г. Алматы, ул. ..." data-i18n-ph="addrPh">
+    </div>
+    <div>
+      <label data-i18n="bank">Банк</label>
+      <input type="text" id="companyBank" placeholder="АО «Forte Bank»" data-i18n-ph="bankPh">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label data-i18n="bik">БИК</label>
       <input type="text" id="companyBik" placeholder="CASPKZKA">
     </div>
     <div>
-      <label>Номер счёта</label>
+      <label data-i18n="acc">Номер счёта</label>
       <input type="text" id="companyAccount" placeholder="KZ...">
     </div>
   </div>
 
   <div class="row">
     <div>
-      <label>КБе</label>
+      <label data-i18n="kbe">КБе</label>
       <input type="text" id="companyKbe" placeholder="17">
     </div>
     <div>
-      <label>Телефон</label>
+      <label data-i18n="phone">Телефон</label>
       <input type="text" id="phone" placeholder="+7 ___ ___ __ __">
     </div>
   </div>
 
-  <button class="btn" id="downloadBtn" onclick="generateAndDownload()">
-    📄 Сформировать и скачать договор
-  </button>
+  <button class="btn" id="downloadBtn" onclick="generateAndDownload()" data-i18n="dl">📄 Сформировать и скачать договор</button>
 
   <div class="btn-row">
-    <button class="btn btn-secondary" id="previewBtn" onclick="previewDocument()">
-      👁 Предпросмотр
-    </button>
-    <button class="btn btn-secondary" id="templateBtn" onclick="downloadTemplate()">
-      📋 Скачать пустой шаблон
-    </button>
+    <button class="btn btn-secondary" id="previewBtn" onclick="previewDocument()" data-i18n="prev">👁 Предпросмотр</button>
+    <button class="btn btn-secondary" id="templateBtn" onclick="downloadTemplate()" data-i18n="tpl">📋 Скачать пустой шаблон</button>
   </div>
 
-  <button class="btn btn-clear" onclick="clearForm()">
-    🗑 Очистить форму
-  </button>
+  <button class="btn btn-clear" onclick="clearForm()" data-i18n="clear">🗑 Очистить форму</button>
 
   <div class="status" id="status"></div>
 </div>
@@ -229,7 +229,7 @@
 <script>
 // ============ КОНФИГ ============
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj_qMalCehP2WyxLAm_KIz3Md9TLU6Szaf5IoVAZfKAHZO_Gq3CZFW4R5MYOgWGIl5FA/exec';
-const VERSION = '1.6';
+const VERSION = '2.0';
 document.getElementById('versionInfo').textContent = 'v' + VERSION;
 
 // ============ ДАННЫЕ ============
@@ -418,22 +418,83 @@ const LOCATIONS = {
   }
 };
 
+// ============ ЯЗЫК ИНТЕРФЕЙСА ============
+const U = {
+  ru: { title:'Генератор договоров', sub:'PANA HOTELS — гостиничные услуги', loc:'Локация *', disc:'Скидка, %', locSel:'— выберите локацию —',
+        num:'Номер договора * (подставляется автоматически)', numPh:'Выберите локацию — номер появится сам', refresh:'↻ Обновить номер',
+        date:'Дата договора *', company:'Название организации *', companyPh:'ТОО «NOVOTEL»', bin:'БИН / ИИН *', dirname:'ФИО директора *', dirPh:'Ахметов А.А.',
+        basis:'Основание (на основании чего действует)', basisPh:'например: Устава, Доверенности № 5 от 01.01.2026, Приказа',
+        address:'Юридический адрес', addrPh:'г. Алматы, ул. ...', bank:'Банк', bankPh:'АО «Forte Bank»', bik:'БИК', acc:'Номер счёта', kbe:'КБе', phone:'Телефон',
+        dl:'📄 Сформировать и скачать договор', prev:'👁 Предпросмотр', tpl:'📋 Скачать пустой шаблон', clear:'🗑 Очистить форму', forming:'Формирование...',
+        notReady:'Текст договора на этом языке ещё не подключён — выберите «RU».' },
+  kk: { title:'Шарттар генераторы', sub:'PANA HOTELS — қонақ үй қызметтері', loc:'Локация *', disc:'Жеңілдік, %', locSel:'— локацияны таңдаңыз —',
+        num:'Шарт нөмірі * (автоматты түрде қойылады)', numPh:'Локацияны таңдаңыз — нөмір өзі шығады', refresh:'↻ Нөмірді жаңарту',
+        date:'Шарт күні *', company:'Ұйым атауы *', companyPh:'«NOVOTEL» ЖШС', bin:'БСН / ЖСН *', dirname:'Директордың аты-жөні *', dirPh:'Ахметов А.А.',
+        basis:'Негіздеме (қандай негізде әрекет етеді)', basisPh:'мысалы: Жарғы, 01.01.2026 жылғы № 5 сенімхат, Бұйрық',
+        address:'Заңды мекенжайы', addrPh:'Алматы қ., ... көшесі', bank:'Банк', bankPh:'«Forte Bank» АҚ', bik:'БСК', acc:'Шот нөмірі', kbe:'КБе', phone:'Телефон',
+        dl:'📄 Шартты қалыптастырып жүктеу', prev:'👁 Алдын ала қарау', tpl:'📋 Бос үлгіні жүктеу', clear:'🗑 Форманы тазалау', forming:'Қалыптастырылуда...',
+        notReady:'Шарттың бұл тілдегі мәтіні әлі қосылмаған — «RU» таңдаңыз.' },
+  en: { title:'Contract Generator', sub:'PANA HOTELS — hotel services', loc:'Location *', disc:'Discount, %', locSel:'— select location —',
+        num:'Contract number * (filled in automatically)', numPh:'Select a location — the number appears automatically', refresh:'↻ Refresh number',
+        date:'Contract date *', company:'Organization name *', companyPh:'NOVOTEL LLP', bin:'BIN / IIN *', dirname:'Director full name *', dirPh:'Akhmetov A.A.',
+        basis:'Authority basis (what the signatory acts on)', basisPh:'e.g.: the Charter, Power of Attorney No. 5 of 01.01.2026, Order',
+        address:'Legal address', addrPh:'Almaty, ... str.', bank:'Bank', bankPh:'JSC Forte Bank', bik:'BIC', acc:'Account number', kbe:'KBe', phone:'Phone',
+        dl:'📄 Generate and download contract', prev:'👁 Preview', tpl:'📋 Download blank template', clear:'🗑 Clear form', forming:'Generating...',
+        notReady:'The contract text in this language is not available yet — please select “RU”.' }
+};
+function curLang() { return getValue('docLang') || 'ru'; }
+function applyLang() {
+  const l = curLang(), D = U[l] || U.ru;
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-i18n]').forEach(el => { if (D[el.dataset.i18n]) el.textContent = D[el.dataset.i18n]; });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { if (D[el.dataset.i18nPh]) el.placeholder = D[el.dataset.i18nPh]; });
+}
+// ============ ЯЗЫКИ ============
+// Рамка документа (стороны, реквизиты, приложение) — на 3 языках.
+// Тексты статей договора: BODY_READY показывает, для каких языков они подключены.
+const BODY_READY = { ru: true, kk: false, en: false };
+const T = {
+  ru: { charter:'Устава', exec:'ИСПОЛНИТЕЛЬ', cust:'ЗАКАЗЧИК', addr:'Адрес:', bin:'БИН (ИИН):', bank:'Банк:', kbe:'КБе:', bik:'БИК:', acc:'Номер счёта:',
+        dir:'Директор', mp:'М.П.', req:'Реквизиты сторон', appx:n=>'Приложение к Договору № '+n, price:'Прайс-лист на гостиничные услуги', hotel:'Отель:',
+        months:['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'],
+        date:(d,m,y)=>`«${d}» ${m} ${y} г.`, blank:'«___» _________ 20___ г.' },
+  kk: { charter:'Жарғы', exec:'ОРЫНДАУШЫ', cust:'ТАПСЫРЫС БЕРУШІ', addr:'Мекенжайы:', bin:'БСН (ЖСН):', bank:'Банк:', kbe:'КБе:', bik:'БСК:', acc:'Шот нөмірі:',
+        dir:'Директор', mp:'М.О.', req:'Тараптардың деректемелері', appx:n=>'№ '+n+' Шартқа қосымша', price:'Қонақ үй қызметтеріне арналған прайс-парақ', hotel:'Қонақ үй:',
+        months:['қаңтар','ақпан','наурыз','сәуір','мамыр','маусым','шілде','тамыз','қыркүйек','қазан','қараша','желтоқсан'],
+        date:(d,m,y)=>`${y} жылғы «${d}» ${m}`, blank:'20___ жылғы «___» _________' },
+  en: { charter:'the Charter', exec:'CONTRACTOR', cust:'CUSTOMER', addr:'Address:', bin:'BIN (IIN):', bank:'Bank:', kbe:'KBe:', bik:'BIC:', acc:'Account No.:',
+        dir:'Director', mp:'Seal', req:'Details of the Parties', appx:n=>'Appendix to Contract No. '+n, price:'Price list for hotel services', hotel:'Hotel:',
+        months:['January','February','March','April','May','June','July','August','September','October','November','December'],
+        date:(d,m,y)=>`${m} ${d}, ${y}`, blank:'____ __________, 20___' }
+};
+let t = T.ru;  // активный язык при сборке документа
+
+function langReady(lang) {
+  if (BODY_READY[lang]) return true;
+  const status = document.getElementById('status');
+  status.className = 'status err';
+  status.textContent = U[curLang()].notReady;
+  return false;
+}
+
 // ============ ВСПОМОГАТЕЛЬНЫЕ ============
+function todayLocal() {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return d.getFullYear() + '-' + m + '-' + day;
+}
+
 function getValue(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
 
 function formatDateRu(isoDate) {
-  if (!isoDate) return '«___» _________ 20___ г.';
+  if (!isoDate) return t.blank;
   // Разбираем строку вручную, чтобы не было сдвига дня из-за часового пояса
   const parts = isoDate.split('-');
-  const y = parseInt(parts[0], 10);
-  const m = parseInt(parts[1], 10) - 1;
-  const day = parseInt(parts[2], 10);
-  const months = ['января','февраля','марта','апреля','мая','июня',
-                  'июля','августа','сентября','октября','ноября','декабря'];
-  return `«${day}» ${months[m]} ${y} г.`;
+  return t.date(parseInt(parts[2], 10), t.months[parseInt(parts[1], 10) - 1], parseInt(parts[0], 10));
 }
 
 function onLocationChange() {
@@ -466,12 +527,13 @@ function showLocationInfo(loc) {
 function getFormData() {
   return {
     location: getValue('location'),
+    lang: getValue('docLang') || 'ru',
     contractNumber: getValue('contractNumber'),
     contractDate: getValue('contractDate'),
     companyName: getValue('companyName'),
     companyBin: getValue('companyBin'),
     directorName: getValue('directorName'),
-    directorBasis: getValue('directorBasis') || 'Устава',
+    directorBasis: getValue('directorBasis') || T[getValue('docLang') || 'ru'].charter,
     companyAddress: getValue('companyAddress'),
     companyBank: getValue('companyBank'),
     companyBik: getValue('companyBik'),
@@ -559,7 +621,7 @@ function loadDraft() {
     DRAFT_FIELDS.forEach(id => {
       const el = document.getElementById(id);
       const saved = localStorage.getItem('draft_' + id);
-      if (el && saved) el.value = saved;
+      if (el && saved && id !== 'contractDate') el.value = saved;  // дата всегда текущая
     });
   } catch (e) {}
 }
@@ -569,17 +631,47 @@ function clearForm() {
   DRAFT_FIELDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-      if (id === 'directorBasis') el.value = 'Устава';
-      else if (id === 'contractDate') el.value = new Date().toISOString().split('T')[0];
+      if (id === 'docLang') { /* язык не сбрасываем */ }
+      else if (id === 'directorBasis') el.value = '';
+      else if (id === 'contractDate') el.value = todayLocal();
       else el.value = '';
     }
   });
   try { localStorage.clear(); } catch (e) {}
+  saveDraft();
+  document.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
   lastRegisteredKey = '';
   lastLookupBin = '';
   document.getElementById('locInfo').className = 'loc-info';
   document.getElementById('discount').value = '';
   document.getElementById('status').className = 'status';
+}
+
+// ============ ПРОВЕРКА ЗАПОЛНЕНИЯ ============
+const REQUIRED_FIELDS = {
+  location: 'Локация', contractDate: 'Дата договора', companyName: 'Название организации',
+  companyBin: 'БИН / ИИН', directorName: 'ФИО директора'
+};
+
+function validateForm() {
+  const status = document.getElementById('status');
+  document.querySelectorAll('.invalid').forEach(e => e.classList.remove('invalid'));
+  const problems = [];
+  const bad = [];
+  Object.keys(REQUIRED_FIELDS).forEach(id => {
+    const val = getValue(id);
+    if (!val || (id === 'location' && !LOCATIONS[val])) {
+      problems.push(REQUIRED_FIELDS[id]); bad.push(id);
+    } else if (id === 'companyBin' && !/^\d{12}$/.test(val)) {
+      problems.push('БИН / ИИН (нужно ровно 12 цифр)'); bad.push(id);
+    }
+  });
+  if (!bad.length) return true;
+  bad.forEach(id => document.getElementById(id).classList.add('invalid'));
+  document.getElementById(bad[0]).focus();
+  status.className = 'status err';
+  status.textContent = 'Не заполнено: ' + problems.join(', ');
+  return false;
 }
 
 // ============ ГЕНЕРАЦИЯ ============
@@ -589,30 +681,12 @@ async function generateAndDownload() {
   const status = document.getElementById('status');
   const btn = document.getElementById('downloadBtn');
   const loc = getValue('location');
+  if (!langReady(getValue('docLang') || 'ru')) return;
 
-  if (!loc || !LOCATIONS[loc]) {
-    status.className = 'status err';
-    status.textContent = 'Выберите локацию';
-    return;
-  }
-
-  const required = ['contractDate','companyName','companyBin','directorName'];
-  for (const id of required) {
-    if (!getValue(id)) {
-      status.className = 'status err';
-      status.textContent = 'Заполните все обязательные поля (*)';
-      return;
-    }
-  }
-
-  if (!/^\d{12}$/.test(getValue('companyBin'))) {
-    status.className = 'status err';
-    status.textContent = 'БИН/ИИН должен состоять ровно из 12 цифр';
-    return;
-  }
+  if (!validateForm()) return;
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Формирование...';
+  btn.innerHTML = '<span class="spinner"></span>' + U[curLang()].forming;
 
   // Если номера нет — получаем автоматически
   if (!getValue('contractNumber')) await fetchNextNumber();
@@ -659,10 +733,11 @@ async function generateAndDownload() {
     status.textContent = 'Договор скачан, но НЕ записан в реестр — проверьте связь и повторите.';
   }
   btn.disabled = false;
-  btn.innerHTML = '📄 Сформировать и скачать договор';
+  btn.innerHTML = U[curLang()].dl;
 }
 
 function previewDocument() {
+  if (!langReady(getValue('docLang') || 'ru')) return;
   const loc = getValue('location');
   if (!loc || !LOCATIONS[loc]) { alert('Выберите локацию'); return; }
   const data = getFormData();
@@ -673,6 +748,7 @@ function previewDocument() {
 }
 
 function downloadTemplate() {
+  if (!langReady(getValue('docLang') || 'ru')) return;
   const loc = getValue('location');
   const status = document.getElementById('status');
   if (!loc || !LOCATIONS[loc]) {
@@ -683,9 +759,9 @@ function downloadTemplate() {
 
   const L = LOCATIONS[loc];
   const data = {
-    location: loc, contractNumber: '___', contractDate: '',
+    location: loc, lang: getValue('docLang') || 'ru', contractNumber: '___', contractDate: '',
     companyName: '_____________________', companyBin: '_____________________',
-    directorName: '_____________________', directorBasis: 'Устава',
+    directorName: '_____________________', directorBasis: T[getValue('docLang') || 'ru'].charter,
     companyAddress: '_____________________', companyBank: '_____________________',
     companyBik: '_____________________', companyAccount: '_____________________',
     companyKbe: '_____________________', phone: '_____________________'
@@ -707,6 +783,7 @@ function downloadTemplate() {
 }
 
 function buildDocumentHTML(d) {
+  t = T[d.lang] || T.ru;
   const L = LOCATIONS[d.location];
   const dateRu = formatDateRu(d.contractDate);
   const discountFactor = ((100 - L.discount) / 100).toFixed(2);
@@ -720,7 +797,7 @@ function buildDocumentHTML(d) {
 
   const today = new Date().toLocaleDateString('ru-RU');
 
-  return `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+  return `<html lang="${d.lang || 'ru'}" xmlns:o="urn:schemas-microsoft-com:office:office"
       xmlns:w="urn:schemas-microsoft-com:office:word"
       xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8"><title>${docTitle}</title>
@@ -877,42 +954,42 @@ function buildDirect(d, L, dateRu, discountFactor, docTitle) {
 <p>11.1. Изменения — только в письменном виде за подписью Сторон.</p>
 <p>11.2. Договор составлен в 3 (трёх) экземплярах: два для Исполнителя, один для Заказчика.</p>
 
-<h2>Реквизиты сторон</h2>
+<h2>${t.req}</h2>
 <table style="width:100%; border:none; border-collapse:collapse; margin-top:12pt;">
   <tr>
     <td style="width:50%; border:none; vertical-align:top; padding:0 8pt 0 0; font-size:10.5pt;">
-      <p class="bold">ИСПОЛНИТЕЛЬ</p>
+      <p class="bold">${t.exec}</p>
       <p>${L.execFullName}<br>
-      Адрес: ${L.execAddress}<br>
-      БИН (ИИН): ${L.execBin}<br>
-      Банк: ${L.execBank}<br>
-      КБе: ${L.execKbe}<br>
-      БИК: ${L.execBik}<br>
-      Номер счёта: ${L.execAccount}</p>
-      <p>Директор _______________ ${L.execDirector}</p>
-      <p>М.П.</p>
+      ${t.addr} ${L.execAddress}<br>
+      ${t.bin} ${L.execBin}<br>
+      ${t.bank} ${L.execBank}<br>
+      ${t.kbe} ${L.execKbe}<br>
+      ${t.bik} ${L.execBik}<br>
+      ${t.acc} ${L.execAccount}</p>
+      <p>${t.dir} _______________ ${L.execDirector}</p>
+      <p>${t.mp}</p>
     </td>
     <td style="width:50%; border:none; vertical-align:top; padding:0 0 0 8pt; font-size:10.5pt;">
-      <p class="bold">ЗАКАЗЧИК</p>
+      <p class="bold">${t.cust}</p>
       <p>${d.companyName}<br>
-      Адрес: ${d.companyAddress || '_______________________'}<br>
-      БИН (ИИН): ${d.companyBin}<br>
-      Банк: ${d.companyBank || '_______________________'}<br>
-      КБе: ${d.companyKbe || '_______________________'}<br>
-      БИК: ${d.companyBik || '_______________________'}<br>
-      Номер счёта: ${d.companyAccount || '_______________________'}</p>
-      <p>Директор _______________ ${d.directorName}</p>
-      <p>М.П.</p>
+      ${t.addr} ${d.companyAddress || '_______________________'}<br>
+      ${t.bin} ${d.companyBin}<br>
+      ${t.bank} ${d.companyBank || '_______________________'}<br>
+      ${t.kbe} ${d.companyKbe || '_______________________'}<br>
+      ${t.bik} ${d.companyBik || '_______________________'}<br>
+      ${t.acc} ${d.companyAccount || '_______________________'}</p>
+      <p>${t.dir} _______________ ${d.directorName}</p>
+      <p>${t.mp}</p>
     </td>
   </tr>
 </table>
 
 ${pageBreak()}
 
-<h1>Приложение к Договору № ${d.contractNumber}</h1>
-<h2>Прайс-лист на гостиничные услуги</h2>
-<p>Отель: <span class="bold">${L.hotelName}</span></p>
-<p>Адрес: ${L.hotelAddress}</p>
+<h1>${t.appx(d.contractNumber)}</h1>
+<h2>${t.price}</h2>
+<p>${t.hotel} <span class="bold">${L.hotelName}</span></p>
+<p>${t.addr} ${L.hotelAddress}</p>
 <p>Стандартное время заезда/выезда: заезд 14:00, выезд 12:00.</p>
 <p>Ранний заезд (до 14:00) — +50% к стоимости номера за сутки.</p>
 <p>Поздний выезд (после 12:00) — +50% к стоимости номера за сутки.</p>
@@ -934,16 +1011,16 @@ ${roomsTable(L)}
 <table style="width:100%; border:none; border-collapse:collapse; margin-top:12pt;">
   <tr>
     <td style="width:50%; border:none; vertical-align:top; padding:0 8pt 0 0; font-size:10.5pt;">
-      <p class="bold">ИСПОЛНИТЕЛЬ</p>
+      <p class="bold">${t.exec}</p>
       <p>${L.execFullName}</p>
-      <p>Директор _______________ ${L.execDirector}</p>
-      <p>М.П.</p>
+      <p>${t.dir} _______________ ${L.execDirector}</p>
+      <p>${t.mp}</p>
     </td>
     <td style="width:50%; border:none; vertical-align:top; padding:0 0 0 8pt; font-size:10.5pt;">
-      <p class="bold">ЗАКАЗЧИК</p>
+      <p class="bold">${t.cust}</p>
       <p>${d.companyName}</p>
-      <p>Директор _______________ ${d.directorName}</p>
-      <p>М.П.</p>
+      <p>${t.dir} _______________ ${d.directorName}</p>
+      <p>${t.mp}</p>
     </td>
   </tr>
 </table>`;
@@ -1060,39 +1137,39 @@ function buildB2B(d, L, dateRu, discountFactor, docTitle) {
 <table style="width:100%; border:none; border-collapse:collapse; margin-top:12pt;">
   <tr>
     <td style="width:50%; border:none; vertical-align:top; padding:0 8pt 0 0; font-size:10.5pt;">
-      <p class="bold">ИСПОЛНИТЕЛЬ</p>
+      <p class="bold">${t.exec}</p>
       <p>${L.execFullName}<br>
-      Адрес: ${L.execAddress}<br>
-      БИН (ИИН): ${L.execBin}<br>
-      Банк: ${L.execBank}<br>
-      КБе: ${L.execKbe}<br>
-      БИК: ${L.execBik}<br>
-      Номер счёта: ${L.execAccount}<br>
+      ${t.addr} ${L.execAddress}<br>
+      ${t.bin} ${L.execBin}<br>
+      ${t.bank} ${L.execBank}<br>
+      ${t.kbe} ${L.execKbe}<br>
+      ${t.bik} ${L.execBik}<br>
+      ${t.acc} ${L.execAccount}<br>
       E-mail: ${L.bookingEmail}</p>
-      <p>Директор _______________ ${L.execDirector}</p>
-      <p>М.П.</p>
+      <p>${t.dir} _______________ ${L.execDirector}</p>
+      <p>${t.mp}</p>
     </td>
     <td style="width:50%; border:none; vertical-align:top; padding:0 0 0 8pt; font-size:10.5pt;">
-      <p class="bold">ЗАКАЗЧИК</p>
+      <p class="bold">${t.cust}</p>
       <p>${d.companyName}<br>
-      Почтовый адрес: ${d.companyAddress || '_______________________'}<br>
-      БИН (ИИН): ${d.companyBin}<br>
-      Банк: ${d.companyBank || '_______________________'}<br>
-      КБе: ${d.companyKbe || '_______________________'}<br>
-      БИК: ${d.companyBik || '_______________________'}<br>
-      Номер счёта: ${d.companyAccount || '_______________________'}</p>
-      <p>Директор _______________ ${d.directorName}</p>
-      <p>М.П.</p>
+      ${t.addr} ${d.companyAddress || '_______________________'}<br>
+      ${t.bin} ${d.companyBin}<br>
+      ${t.bank} ${d.companyBank || '_______________________'}<br>
+      ${t.kbe} ${d.companyKbe || '_______________________'}<br>
+      ${t.bik} ${d.companyBik || '_______________________'}<br>
+      ${t.acc} ${d.companyAccount || '_______________________'}</p>
+      <p>${t.dir} _______________ ${d.directorName}</p>
+      <p>${t.mp}</p>
     </td>
   </tr>
 </table>
 
 ${pageBreak()}
 
-<h1>Приложение к Договору № ${d.contractNumber}</h1>
-<h2>Прайс-лист на гостиничные услуги</h2>
-<p>Отель: <span class="bold">${L.hotelName}</span></p>
-<p>Адрес: ${L.hotelAddress}</p>
+<h1>${t.appx(d.contractNumber)}</h1>
+<h2>${t.price}</h2>
+<p>${t.hotel} <span class="bold">${L.hotelName}</span></p>
+<p>${t.addr} ${L.hotelAddress}</p>
 <p>Стандартное время заезда/выезда: заезд 14:00, выезд 12:00.</p>
 <p>Ранний заезд (до 14:00) — +50% к стоимости номера за сутки.</p>
 <p>Поздний выезд (после 12:00) — +50% к стоимости номера за сутки.</p>
@@ -1121,16 +1198,16 @@ ${roomsTable(L)}
 <table style="width:100%; border:none; border-collapse:collapse; margin-top:12pt;">
   <tr>
     <td style="width:50%; border:none; vertical-align:top; padding:0 8pt 0 0; font-size:10.5pt;">
-      <p class="bold">ИСПОЛНИТЕЛЬ</p>
+      <p class="bold">${t.exec}</p>
       <p>${L.execFullName}</p>
-      <p>Директор _______________ ${L.execDirector}</p>
-      <p>М.П.</p>
+      <p>${t.dir} _______________ ${L.execDirector}</p>
+      <p>${t.mp}</p>
     </td>
     <td style="width:50%; border:none; vertical-align:top; padding:0 0 0 8pt; font-size:10.5pt;">
-      <p class="bold">ЗАКАЗЧИК</p>
+      <p class="bold">${t.cust}</p>
       <p>${d.companyName}</p>
-      <p>Директор _______________ ${d.directorName}</p>
-      <p>М.П.</p>
+      <p>${t.dir} _______________ ${d.directorName}</p>
+      <p>${t.mp}</p>
     </td>
   </tr>
 </table>`;
@@ -1138,8 +1215,7 @@ ${roomsTable(L)}
 
 // ============ ИНИЦИАЛИЗАЦИЯ ============
 window.addEventListener('DOMContentLoaded', function() {
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('contractDate').value = today;
+  document.getElementById('contractDate').value = todayLocal();
 
   loadDraft();
 
@@ -1156,6 +1232,10 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('companyBin').addEventListener('input', lookupByBin);
+  Object.keys(REQUIRED_FIELDS).forEach(id => {
+    const el = document.getElementById(id);
+    ['input', 'change'].forEach(ev => el.addEventListener(ev, () => el.classList.remove('invalid')));
+  });
 });
 </script>
 
