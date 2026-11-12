@@ -8,7 +8,6 @@
   * { box-sizing: border-box; }
   body {
     font-family: Arial, sans-serif;
-    font-size: 10px;
     background: #f4f6fa;
     margin: 0;
     padding: 40px 20px;
@@ -23,18 +22,18 @@
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   }
-  h1 { font-size: 10px; margin-bottom: 6px; color: #1a3d6d; }
-  .subtitle { font-size: 10px; color: #666; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-  .version { font-size: 10px; color: #999; }
+  h1 { font-size: 22px; margin-bottom: 6px; color: #1a3d6d; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+  .version { font-size: 11px; color: #999; }
   .row { display: flex; gap: 15px; margin-bottom: 15px; }
   .row > div { flex: 1; }
-  label { display: block; font-size: 10px; font-weight: 600; margin-bottom: 4px; color: #333; }
+  label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #333; }
   input, select {
     width: 100%;
     padding: 9px 11px;
     border: 1px solid #ccd2dc;
     border-radius: 6px;
-    font-size: 10px;
+    font-size: 14px;
     font-family: inherit;
   }
   input:focus, select:focus { border-color: #2a6fdb; outline: none; }
@@ -45,7 +44,7 @@
     color: #fff;
     border: none;
     border-radius: 8px;
-    font-size: 10px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     margin-top: 15px;
@@ -62,7 +61,7 @@
     margin-top: 15px;
     padding: 10px;
     border-radius: 6px;
-    font-size: 10px;
+    font-size: 13px;
     display: none;
   }
   .status.ok { background: #e6f4ea; color: #1e7d38; display: block; }
@@ -72,7 +71,7 @@
     background: #eef3fc;
     padding: 10px 14px;
     border-radius: 6px;
-    font-size: 10px;
+    font-size: 12px;
     color: #1a3d6d;
     margin-bottom: 15px;
     display: none;
@@ -80,8 +79,8 @@
   .loc-info.visible { display: block; }
   .spinner {
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     border: 2px solid rgba(255,255,255,0.4);
     border-top-color: #fff;
     border-radius: 50%;
@@ -96,7 +95,7 @@
     border: 1px solid #2a6fdb;
     border-radius: 6px;
     padding: 6px 10px;
-    font-size: 10px;
+    font-size: 12px;
     cursor: pointer;
     margin-top: 4px;
   }
@@ -112,8 +111,8 @@
     body { padding: 15px 10px; }
     .container { padding: 20px; }
     .row { flex-direction: column; gap: 10px; }
-    h1 { font-size: 10px; }
-    .btn { font-size: 10px; padding: 12px; }
+    h1 { font-size: 18px; }
+    .btn { font-size: 14px; padding: 12px; }
     .btn-row { flex-direction: column; }
   }
 </style>
@@ -832,7 +831,7 @@ th { background: #f0f0f0; text-align: center; }
 ul { margin: 3pt 0; padding-left: 18pt; }
 li { margin: 1pt 0; }
 a { color: #000; text-decoration: none; }
-.doc-footer { font-size: 10pt; color: #666; text-align: right; margin-top: 10pt; }
+.doc-footer { font-size: 8pt; color: #666; text-align: right; margin-top: 10pt; }
 </style></head><body>${content}
 <p class="doc-footer">Редакция шаблона v${VERSION} от ${today}</p>
 </body></html>`;
